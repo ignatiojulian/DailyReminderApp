@@ -9,11 +9,11 @@ import SwiftUI
 
 struct RemindersListView: View {
     @ObservedObject private var viewModel: RemindersViewModel
-    @State private var selectedReminder: Reminder? = nil
-    @State private var showingAddSheet = false
+    @ObservedObject private var coordinator: RemindersCoordinator
     
-    init(viewModel: RemindersViewModel) {
+    init(viewModel: RemindersViewModel, coordinator: RemindersCoordinator) {
         self.viewModel = viewModel
+        self.coordinator = coordinator
     }
     
     var body: some View {
@@ -28,7 +28,7 @@ struct RemindersListView: View {
                                 })
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    selectedReminder = reminder
+                                    coordinator.showEditReminder(reminder)
                                 }
                             }
                             .onDelete { offsets in
@@ -47,22 +47,22 @@ struct RemindersListView: View {
                     }
                 }
                 .navigationTitle("Reminders")
-                .sheet(item: $selectedReminder) { reminder in
+                .sheet(item: $coordinator.selectedReminder) { reminder in
                     ReminderFormView(reminder: reminder) { title, notes, dueDate in
                         viewModel.update(reminder: reminder, title: title, notes: notes, dueDate: dueDate)
-                        selectedReminder = nil
+                        coordinator.dismissSheets()
                     }
                     .onDisappear {
-                        selectedReminder = nil
+                        coordinator.dismissSheets()
                     }
                 }
-                .sheet(isPresented: $showingAddSheet) {
+                .sheet(isPresented: $coordinator.showingAddSheet) {
                     ReminderFormView(reminder: nil) { title, notes, dueDate in
                         viewModel.add(title: title, notes: notes, dueDate: dueDate)
-                        showingAddSheet = false
+                        coordinator.dismissSheets()
                     }
                     .onDisappear {
-                        showingAddSheet = false
+                        coordinator.dismissSheets()
                     }
                 }
             }
@@ -71,8 +71,7 @@ struct RemindersListView: View {
                 HStack {
                     Spacer()
                     Button {
-                        selectedReminder = nil
-                        showingAddSheet = true
+                        coordinator.showAddReminder()
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 24, weight: .bold))
@@ -89,5 +88,8 @@ struct RemindersListView: View {
 }
 
 #Preview {
-    RemindersListView(viewModel: DependencyContainer.shared.makeRemindersViewModel())
+    RemindersListView(
+        viewModel: DependencyContainer.shared.reminderViewModel(),
+        coordinator: RemindersCoordinator()
+    )
 }

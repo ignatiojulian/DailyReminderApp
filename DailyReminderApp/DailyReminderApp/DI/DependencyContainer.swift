@@ -12,13 +12,31 @@ final class DependencyContainer {
     
     private init() {}
     
-    lazy var notificationService: NotificationServiceProtocol = NotificationService()
-    lazy var reminderStore: any ReminderStoreProtocol = ReminderStore()
+    // MARK: - Data Sources
+    private lazy var reminderLocalDataSource = ReminderLocalDataSource()
+    private lazy var notificationDataSource = NotificationDataSource()
     
-    func makeRemindersViewModel() -> RemindersViewModel {
+    // MARK: - Repositories
+    private lazy var reminderRepository: ReminderRepositoryProtocol = ReminderRepository(localDataSource: reminderLocalDataSource)
+    private lazy var notificationRepository: NotificationRepositoryProtocol = NotificationRepository(dataSource: notificationDataSource)
+    
+    // MARK: - Use Cases
+    private lazy var getRemindersUseCase: GetRemindersUseCaseProtocol = GetRemindersUseCase(repository: reminderRepository)
+    private lazy var manageReminderUseCase: ManageReminderUseCaseProtocol = ManageReminderUseCase(
+        reminderRepository: reminderRepository,
+        notificationRepository: notificationRepository
+    )
+    private lazy var notificationUseCase: NotificationUseCaseProtocol = NotificationUseCase(repository: notificationRepository)
+    
+    // MARK: - Coordinators
+    lazy var appCoordinator = AppCoordinator()
+    
+    // MARK: - Factory Methods
+    func reminderViewModel() -> RemindersViewModel {
         RemindersViewModel(
-            store: reminderStore,
-            notificationService: notificationService
+            getRemindersUseCase: getRemindersUseCase,
+            manageReminderUseCase: manageReminderUseCase,
+            notificationUseCase: notificationUseCase
         )
     }
 }

@@ -10,19 +10,19 @@ import Combine
 
 protocol NotificationServiceProtocol {
     func requestAuthorization(completion: ((Bool) -> Void)?)
-    func scheduleNotification(for reminder: Reminder)
+    func scheduleNotification(for reminder: ReminderModel)
     func removeNotification(for reminderID: UUID)
 }
 
 protocol ReminderStoreProtocol: ObservableObject {
-    var reminders: [Reminder] { get }
-    var remindersPublisher: Published<[Reminder]>.Publisher { get }
+    var reminders: [ReminderModel] { get }
+    var remindersPublisher: Published<[ReminderModel]>.Publisher { get }
     
     func load()
     func save()
-    func add(_ reminder: Reminder)
-    func update(_ reminder: Reminder)
+    func add(_ reminder: ReminderModel)
+    func update(_ reminder: ReminderModel)
     func delete(at offsets: IndexSet)
-    func delete(_ reminder: Reminder)
-    func toggleCompleted(_ reminder: Reminder)
+    func delete(_ reminder: ReminderModel)
+    func toggleCompleted(_ reminder: ReminderModel)
 }

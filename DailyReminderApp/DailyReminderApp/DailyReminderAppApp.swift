@@ -14,7 +14,10 @@ struct DailyReminderAppApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView(viewModel: dependencyContainer.makeRemindersViewModel())
+            ContentView(
+                viewModel: dependencyContainer.reminderViewModel(),
+                coordinator: dependencyContainer.appCoordinator
+            )
         }
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ReminderRow: View {
-    let reminder: Reminder
+    let reminder: ReminderModel
     let toggle: () -> Void
     
     var body: some View {

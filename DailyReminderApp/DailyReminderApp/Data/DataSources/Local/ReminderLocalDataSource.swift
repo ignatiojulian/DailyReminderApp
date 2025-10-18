@@ -1,5 +1,5 @@
 //
-//  ReminderStore.swift
+//  ReminderLocalDataSource.swift
 //  DailyReminderApp
 //
 //  Created by Ignatio Julian on 18/10/25.
@@ -8,12 +8,8 @@
 import Foundation
 import Combine
 
-final class ReminderStore: ReminderStoreProtocol {
-    @Published private(set) var reminders: [Reminder] = []
-    
-    var remindersPublisher: Published<[Reminder]>.Publisher {
-        $reminders
-    }
+final class ReminderLocalDataSource {
+    @Published private(set) var reminders: [ReminderModel] = []
 
     private let fileURL: URL
     private var cancellables: Set<AnyCancellable> = []
@@ -26,14 +22,14 @@ final class ReminderStore: ReminderStoreProtocol {
 
         $reminders
             .debounce(for: DispatchQueue.SchedulerTimeType.Stride.milliseconds(300), scheduler: DispatchQueue.main)
-            .sink { [weak self] (_: [Reminder]) in self?.save() }
+            .sink { [weak self] (_: [ReminderModel]) in self?.save() }
             .store(in: &cancellables)
     }
 
     func load() {
         do {
             let data = try Data(contentsOf: fileURL)
-            let decoded = try JSONDecoder().decode([Reminder].self, from: data)
+            let decoded = try JSONDecoder().decode([ReminderModel].self, from: data)
             reminders = decoded
         } catch {
            
@@ -51,12 +47,12 @@ final class ReminderStore: ReminderStoreProtocol {
     }
 
     // CRUD operations
-    func add(_ reminder: Reminder) {
+    func add(_ reminder: ReminderModel) {
         reminders.append(reminder)
         reminders = reminders.sortedByDueDate()
     }
 
-    func update(_ reminder: Reminder) {
+    func update(_ reminder: ReminderModel) {
         if let idx = reminders.firstIndex(where: { $0.id == reminder.id }) {
             reminders[idx] = reminder
             reminders = reminders.sortedByDueDate()
@@ -69,13 +65,12 @@ final class ReminderStore: ReminderStoreProtocol {
         }
     }
 
-    func delete(_ reminder: Reminder) {
+    func delete(_ reminder: ReminderModel) {
         reminders.removeAll { $0.id == reminder.id }
     }
 
-    func toggleCompleted(_ reminder: Reminder) {
+    func toggleCompleted(_ reminder: ReminderModel) {
         guard let idx = reminders.firstIndex(where: { $0.id == reminder.id }) else { return }
         reminders[idx].isCompleted.toggle()
     }
 }
-

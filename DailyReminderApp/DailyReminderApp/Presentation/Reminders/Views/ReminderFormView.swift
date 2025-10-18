@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ReminderFormView: View {
-    let reminder: Reminder?
+    let reminder: ReminderModel?
     let onSave: (_ title: String, _ notes: String?, _ dueDate: Date?) -> Void
     @Environment(\.dismiss) private var dismiss
 

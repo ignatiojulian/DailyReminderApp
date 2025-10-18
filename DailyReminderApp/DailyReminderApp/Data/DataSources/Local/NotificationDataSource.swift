@@ -1,5 +1,5 @@
 //
-//  NotificationService.swift
+//  NotificationDataSource.swift
 //  DailyReminderApp
 //
 //  Created by Ignatio Julian on 18/10/25.
@@ -8,8 +8,8 @@
 import Foundation
 import UserNotifications
 
-final class NotificationService: NotificationServiceProtocol {
-    static let shared = NotificationService()
+final class NotificationDataSource {
+    static let shared = NotificationDataSource()
 
     init() {}
 
@@ -22,7 +22,7 @@ final class NotificationService: NotificationServiceProtocol {
         }
     }
 
-    func scheduleNotification(for reminder: Reminder) {
+    func scheduleNotification(for reminder: ReminderModel) {
         guard let dueDate = reminder.dueDate else { return }
         
         let notificationDate = dueDate.addingTimeInterval(-10 * 60)
