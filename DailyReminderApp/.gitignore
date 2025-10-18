@@ -1,17 +1,33 @@
-# Xcode and Swift
-build/
+# Xcode / iOS build artifacts
 DerivedData/
-xcuserdata/
+build/
 
 # Swift Package Manager
+.build/
 Packages/
-.swiftpm/
+Package.pins
+Package.resolved
 
 # CocoaPods
 Pods/
 
 # Carthage
 Carthage/Build/
+Carthage/Checkouts/
+
+# Xcode project/user state
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.moved-aside
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace/
 
 # Fastlane
 fastlane/report.xml
@@ -19,29 +35,15 @@ fastlane/Preview.html
 fastlane/screenshots/
 fastlane/test_output/
 
-# iOS specific
-*.ipa
-*.dSYM
-*.xcuserstate
-
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
-# Editor/swaps
-*~
+# Editor/IDE
+.vscode/
+.idea/
 *.swp
-*.swo
 
-# Xcode project data that should not be versioned
-*.xccheckout
-*.xcscmblueprint
-
-# Generated files
-*.hmap
-
-# Playgrounds
-timeline.xctimeline
-playground.xcworkspace/
-
-# User-specific settings
-*.xcuserdatad
+# Project-specific
+build.log

@@ -1,0 +1,76 @@
+//
+//  RemindersViewModel.swift
+//  DailyReminderApp
+//
+//  Created by Ignatio Julian on 18/10/25.
+//
+
+import Foundation
+import Combine
+import SwiftUI
+
+final class RemindersViewModel: ObservableObject {
+    @Published private(set) var reminders: [Reminder] = []
+
+    private let store: ReminderStore
+    private let notifications: NotificationService
+
+    init(store: ReminderStore = ReminderStore(), notifications: NotificationService = .shared) {
+        self.store = store
+        self.notifications = notifications
+        self.reminders = store.reminders
+
+        store.$reminders
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (updated: [Reminder]) in
+                self?.reminders = updated
+            }
+            .store(in: &cancellables)
+
+        notifications.requestAuthorization()
+    }
+
+    private var cancellables: Set<AnyCancellable> = []
+
+    var upcomingReminders: [Reminder] {
+        reminders.filter { !$0.isCompleted }.sortedByDueDate()
+    }
+
+    var completedReminders: [Reminder] {
+        reminders.filter { $0.isCompleted }.sortedByDueDate()
+    }
+
+    func add(title: String, notes: String?, dueDate: Date?, shouldNotify: Bool) {
+        let reminder = Reminder(title: title, notes: notes, dueDate: dueDate, isCompleted: false, shouldNotify: shouldNotify)
+        store.add(reminder)
+        if shouldNotify { notifications.scheduleNotification(for: reminder) }
+    }
+
+    func update(reminder: Reminder, title: String, notes: String?, dueDate: Date?, shouldNotify: Bool) {
+        var updated = reminder
+        updated.title = title
+        updated.notes = notes
+        updated.dueDate = dueDate
+        updated.shouldNotify = shouldNotify
+        store.update(updated)
+        notifications.removeNotification(for: updated.id)
+        if shouldNotify { notifications.scheduleNotification(for: updated) }
+    }
+
+    func delete(at offsets: IndexSet) {
+        let toDelete = offsets.map { upcomingReminders[$0] }
+        toDelete.forEach { rem in
+            notifications.removeNotification(for: rem.id)
+            store.delete(rem)
+        }
+    }
+
+    func toggleCompleted(_ reminder: Reminder) {
+        store.toggleCompleted(reminder)
+        if reminder.isCompleted {
+            notifications.removeNotification(for: reminder.id)
+        } else if reminder.shouldNotify, let _ = reminder.dueDate {
+            notifications.scheduleNotification(for: reminder)
+        }
+    }
+}
