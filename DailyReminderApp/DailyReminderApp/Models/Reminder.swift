@@ -13,15 +13,13 @@ struct Reminder: Identifiable, Codable, Equatable {
     var notes: String?
     var dueDate: Date?
     var isCompleted: Bool
-    var shouldNotify: Bool
 
-    init(id: UUID = UUID(), title: String, notes: String? = nil, dueDate: Date? = nil, isCompleted: Bool = false, shouldNotify: Bool = false) {
+    init(id: UUID = UUID(), title: String, notes: String? = nil, dueDate: Date? = nil, isCompleted: Bool = false) {
         self.id = id
         self.title = title
         self.notes = notes
         self.dueDate = dueDate
         self.isCompleted = isCompleted
-        self.shouldNotify = shouldNotify
     }
 }
 

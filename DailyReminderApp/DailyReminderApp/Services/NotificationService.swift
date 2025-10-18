@@ -23,9 +23,11 @@ final class NotificationService {
     }
 
     func scheduleNotification(for reminder: Reminder) {
-        guard reminder.shouldNotify, let dueDate = reminder.dueDate else { return }
-        guard dueDate.timeIntervalSinceNow > 1 else {
-            print("[Notification] Skipping scheduling: dueDate is in the past or too soon: \(dueDate)")
+        guard let dueDate = reminder.dueDate else { return }
+        
+        let notificationDate = dueDate.addingTimeInterval(-10 * 60)
+        
+        guard notificationDate.timeIntervalSinceNow > 1 else {
             return
         }
         let center = UNUserNotificationCenter.current()
@@ -38,7 +40,7 @@ final class NotificationService {
             content.interruptionLevel = .timeSensitive
         }
 
-        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: dueDate)
+        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: notificationDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
 
         let request = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger)

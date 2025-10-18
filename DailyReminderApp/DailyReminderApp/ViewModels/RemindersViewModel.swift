@@ -40,21 +40,20 @@ final class RemindersViewModel: ObservableObject {
         reminders.filter { $0.isCompleted }.sortedByDueDate()
     }
 
-    func add(title: String, notes: String?, dueDate: Date?, shouldNotify: Bool) {
-        let reminder = Reminder(title: title, notes: notes, dueDate: dueDate, isCompleted: false, shouldNotify: shouldNotify)
+    func add(title: String, notes: String?, dueDate: Date?) {
+        let reminder = Reminder(title: title, notes: notes, dueDate: dueDate, isCompleted: false)
         store.add(reminder)
-        if shouldNotify { notifications.scheduleNotification(for: reminder) }
+        notifications.scheduleNotification(for: reminder)
     }
 
-    func update(reminder: Reminder, title: String, notes: String?, dueDate: Date?, shouldNotify: Bool) {
+    func update(reminder: Reminder, title: String, notes: String?, dueDate: Date?) {
         var updated = reminder
         updated.title = title
         updated.notes = notes
         updated.dueDate = dueDate
-        updated.shouldNotify = shouldNotify
         store.update(updated)
         notifications.removeNotification(for: updated.id)
-        if shouldNotify { notifications.scheduleNotification(for: updated) }
+        notifications.scheduleNotification(for: updated)
     }
 
     func delete(at offsets: IndexSet) {
@@ -69,7 +68,7 @@ final class RemindersViewModel: ObservableObject {
         store.toggleCompleted(reminder)
         if reminder.isCompleted {
             notifications.removeNotification(for: reminder.id)
-        } else if reminder.shouldNotify, let _ = reminder.dueDate {
+        } else if let _ = reminder.dueDate {
             notifications.scheduleNotification(for: reminder)
         }
     }

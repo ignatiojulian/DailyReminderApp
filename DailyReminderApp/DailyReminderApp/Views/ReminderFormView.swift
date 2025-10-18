@@ -9,14 +9,13 @@ import SwiftUI
 
 struct ReminderFormView: View {
     let reminder: Reminder?
-    let onSave: (_ title: String, _ notes: String?, _ dueDate: Date?, _ shouldNotify: Bool) -> Void
+    let onSave: (_ title: String, _ notes: String?, _ dueDate: Date?) -> Void
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String = ""
     @State private var notes: String = ""
     @State private var hasDueDate: Bool = false
     @State private var dueDate: Date = Date()
-    @State private var shouldNotify: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -29,7 +28,6 @@ struct ReminderFormView: View {
                     Toggle("Has due date", isOn: $hasDueDate)
                     if hasDueDate {
                         DatePicker("Due date", selection: $dueDate, displayedComponents: [.date, .hourAndMinute])
-                        Toggle("Notify me", isOn: $shouldNotify)
                     }
                 }
             }
@@ -42,7 +40,7 @@ struct ReminderFormView: View {
                     Button("Save") {
                         let notesText = notes.isEmpty ? nil : notes
                         let dateValue: Date? = hasDueDate ? dueDate : nil
-                        onSave(title, notesText, dateValue, shouldNotify && hasDueDate)
+                        onSave(title, notesText, dateValue)
                         dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -56,7 +54,6 @@ struct ReminderFormView: View {
                         hasDueDate = true
                         dueDate = d
                     }
-                    shouldNotify = r.shouldNotify
                 }
             }
         }
@@ -64,5 +61,5 @@ struct ReminderFormView: View {
 }
 
 #Preview {
-    ReminderFormView(reminder: nil) { _, _, _, _ in }
+    ReminderFormView(reminder: nil) { _, _, _ in }
 }

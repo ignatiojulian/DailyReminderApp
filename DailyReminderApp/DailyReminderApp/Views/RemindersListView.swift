@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RemindersListView: View {
     @StateObject private var vm = RemindersViewModel()
+    @State private var selectedReminder: Reminder? = nil
     @State private var showingAddSheet = false
 
     var body: some View {
@@ -23,7 +24,6 @@ struct RemindersListView: View {
                                 })
                                 .contentShape(Rectangle())
                                 .onTapGesture {
-                                    showingAddSheet = true
                                     selectedReminder = reminder
                                 }
                             }
@@ -43,13 +43,22 @@ struct RemindersListView: View {
                     }
                 }
                 .navigationTitle("Reminders")
+                .sheet(item: $selectedReminder) { reminder in
+                    ReminderFormView(reminder: reminder) { title, notes, dueDate in
+                        vm.update(reminder: reminder, title: title, notes: notes, dueDate: dueDate)
+                        selectedReminder = nil
+                    }
+                    .onDisappear {
+                        selectedReminder = nil
+                    }
+                }
                 .sheet(isPresented: $showingAddSheet) {
-                    ReminderFormView(reminder: selectedReminder) { title, notes, dueDate, shouldNotify in
-                        if let editing = selectedReminder {
-                            vm.update(reminder: editing, title: title, notes: notes, dueDate: dueDate, shouldNotify: shouldNotify)
-                        } else {
-                            vm.add(title: title, notes: notes, dueDate: dueDate, shouldNotify: shouldNotify)
-                        }
+                    ReminderFormView(reminder: nil) { title, notes, dueDate in
+                        vm.add(title: title, notes: notes, dueDate: dueDate)
+                        showingAddSheet = false
+                    }
+                    .onDisappear {
+                        showingAddSheet = false
                     }
                 }
             }
@@ -73,8 +82,6 @@ struct RemindersListView: View {
             }
         }
     }
-
-    @State private var selectedReminder: Reminder? = nil
 }
 
 private struct ReminderRow: View {
@@ -103,9 +110,6 @@ private struct ReminderRow: View {
                 }
             }
             Spacer()
-            if reminder.shouldNotify {
-                Image(systemName: "bell.fill").foregroundStyle(.tint)
-            }
         }
     }
 }
