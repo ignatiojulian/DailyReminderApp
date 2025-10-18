@@ -23,34 +23,22 @@ final class NotificationService {
     }
 
     func scheduleNotification(for reminder: Reminder) {
-        guard let dueDate = reminder.dueDate else { return }
-        
-        let targetDate: Date
-        if reminder.shouldNotify {
-            targetDate = dueDate
-        } else {
-            targetDate = Calendar.current.date(byAdding: .minute, value: -10, to: dueDate) ?? dueDate.addingTimeInterval(-600)
-        }
-
-        if targetDate.timeIntervalSinceNow <= 1 {
-            print("[Notification] Skipping scheduling: target date is in the past or too soon. Target: \(targetDate)")
+        guard reminder.shouldNotify, let dueDate = reminder.dueDate else { return }
+        guard dueDate.timeIntervalSinceNow > 1 else {
+            print("[Notification] Skipping scheduling: dueDate is in the past or too soon: \(dueDate)")
             return
         }
         let center = UNUserNotificationCenter.current()
 
         let content = UNMutableNotificationContent()
         content.title = "Daily Reminder App"
-        if reminder.shouldNotify {
-            content.body = "\(reminder.title) at \(dueDate.formatted(date: .omitted, time: .shortened))"
-        } else {
-            content.body = "Upcoming: \(reminder.title) due at \(dueDate.formatted(date: .omitted, time: .shortened))"
-        }
+        content.body = "\(reminder.title) at \(dueDate.formatted(date: .omitted, time: .shortened))"
         content.sound = .default
         if #available(iOS 15.0, *) {
             content.interruptionLevel = .timeSensitive
         }
 
-        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: targetDate)
+        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: dueDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
 
         let request = UNNotificationRequest(identifier: reminder.id.uuidString, content: content, trigger: trigger)
