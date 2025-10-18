@@ -12,53 +12,63 @@ struct RemindersListView: View {
     @State private var showingAddSheet = false
 
     var body: some View {
-        NavigationStack {
-            List {
-                if !vm.upcomingReminders.isEmpty {
-                    Section("Upcoming") {
-                        ForEach(vm.upcomingReminders) { reminder in
-                            ReminderRow(reminder: reminder, toggle: {
-                                vm.toggleCompleted(reminder)
-                            })
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                showingAddSheet = true
-                                selectedReminder = reminder
+        ZStack {
+            NavigationStack {
+                List {
+                    if !vm.upcomingReminders.isEmpty {
+                        Section("Upcoming") {
+                            ForEach(vm.upcomingReminders) { reminder in
+                                ReminderRow(reminder: reminder, toggle: {
+                                    vm.toggleCompleted(reminder)
+                                })
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    showingAddSheet = true
+                                    selectedReminder = reminder
+                                }
+                            }
+                            .onDelete { offsets in
+                                vm.delete(at: offsets)
                             }
                         }
-                        .onDelete { offsets in
-                            vm.delete(at: offsets)
+                    }
+                    if !vm.completedReminders.isEmpty {
+                        Section("Completed") {
+                            ForEach(vm.completedReminders) { reminder in
+                                ReminderRow(reminder: reminder, toggle: {
+                                    vm.toggleCompleted(reminder)
+                                })
+                            }
                         }
                     }
                 }
-                if !vm.completedReminders.isEmpty {
-                    Section("Completed") {
-                        ForEach(vm.completedReminders) { reminder in
-                            ReminderRow(reminder: reminder, toggle: {
-                                vm.toggleCompleted(reminder)
-                            })
+                .navigationTitle("Reminders")
+                .sheet(isPresented: $showingAddSheet) {
+                    ReminderFormView(reminder: selectedReminder) { title, notes, dueDate, shouldNotify in
+                        if let editing = selectedReminder {
+                            vm.update(reminder: editing, title: title, notes: notes, dueDate: dueDate, shouldNotify: shouldNotify)
+                        } else {
+                            vm.add(title: title, notes: notes, dueDate: dueDate, shouldNotify: shouldNotify)
                         }
                     }
                 }
             }
-            .navigationTitle("Reminders")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
                     Button {
                         selectedReminder = nil
                         showingAddSheet = true
                     } label: {
                         Image(systemName: "plus")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.accentColor))
+                            .shadow(radius: 4)
                     }
-                }
-            }
-            .sheet(isPresented: $showingAddSheet) {
-                ReminderFormView(reminder: selectedReminder) { title, notes, dueDate, shouldNotify in
-                    if let editing = selectedReminder {
-                        vm.update(reminder: editing, title: title, notes: notes, dueDate: dueDate, shouldNotify: shouldNotify)
-                    } else {
-                        vm.add(title: title, notes: notes, dueDate: dueDate, shouldNotify: shouldNotify)
-                    }
+                    .padding()
                 }
             }
         }
