@@ -8,11 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
+    private let viewModel: RemindersViewModel
+    
+    init(viewModel: RemindersViewModel) {
+        self.viewModel = viewModel
+    }
+    
     var body: some View {
-        RemindersListView()
+        RemindersListView(viewModel: viewModel)
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(viewModel: DependencyContainer.shared.makeRemindersViewModel())
 }

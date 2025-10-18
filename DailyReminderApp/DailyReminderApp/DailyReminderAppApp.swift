@@ -10,9 +10,11 @@ import SwiftUI
 @main
 struct DailyReminderAppApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    private let dependencyContainer = DependencyContainer.shared
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: dependencyContainer.makeRemindersViewModel())
         }
     }
 }

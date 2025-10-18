@@ -8,8 +8,12 @@
 import Foundation
 import Combine
 
-final class ReminderStore: ObservableObject {
+final class ReminderStore: ReminderStoreProtocol {
     @Published private(set) var reminders: [Reminder] = []
+    
+    var remindersPublisher: Published<[Reminder]>.Publisher {
+        $reminders
+    }
 
     private let fileURL: URL
     private var cancellables: Set<AnyCancellable> = []
@@ -74,3 +78,4 @@ final class ReminderStore: ObservableObject {
         reminders[idx].isCompleted.toggle()
     }
 }
+

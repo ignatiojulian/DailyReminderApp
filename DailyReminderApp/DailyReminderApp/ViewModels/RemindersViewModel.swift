@@ -12,22 +12,22 @@ import SwiftUI
 final class RemindersViewModel: ObservableObject {
     @Published private(set) var reminders: [Reminder] = []
 
-    private let store: ReminderStore
-    private let notifications: NotificationService
+    private let store: any ReminderStoreProtocol
+    private let notifications: NotificationServiceProtocol
 
-    init(store: ReminderStore = ReminderStore(), notifications: NotificationService = .shared) {
+    init(store: any ReminderStoreProtocol, notificationService: NotificationServiceProtocol) {
         self.store = store
-        self.notifications = notifications
+        self.notifications = notificationService
         self.reminders = store.reminders
 
-        store.$reminders
+        store.remindersPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] (updated: [Reminder]) in
-                self?.reminders = updated
+            .sink { [weak self] reminders in
+                self?.reminders = reminders
             }
             .store(in: &cancellables)
 
-        notifications.requestAuthorization()
+        notifications.requestAuthorization(completion: nil)
     }
 
     private var cancellables: Set<AnyCancellable> = []
@@ -73,3 +73,4 @@ final class RemindersViewModel: ObservableObject {
         }
     }
 }
+
