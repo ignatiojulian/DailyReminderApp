@@ -20,7 +20,6 @@ final class ReminderStore: ObservableObject {
         self.fileURL = docs.appendingPathComponent("reminders.json")
         load()
 
-        // Auto-save on change
         $reminders
             .debounce(for: DispatchQueue.SchedulerTimeType.Stride.milliseconds(300), scheduler: DispatchQueue.main)
             .sink { [weak self] (_: [Reminder]) in self?.save() }
@@ -33,7 +32,7 @@ final class ReminderStore: ObservableObject {
             let decoded = try JSONDecoder().decode([Reminder].self, from: data)
             reminders = decoded
         } catch {
-            // If file missing or decode fails, start with empty
+           
             reminders = []
         }
     }
